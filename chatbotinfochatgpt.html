@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chatbot Showcase – FAQs • Bookings • Troubleshooting</title>
+<style>
+  :root{
+    --bg:#0b1020; --card:#0f162e; --muted:#0c1330; --text:#e6e9f2; --sub:#b9c0d9;
+    --accent:#6ee7ff; --accent-2:#a78bfa; --good:#34d399; --warn:#f59e0b; --bad:#ef4444;
+    --chip:#1a2244; --shadow:0 10px 30px rgba(0,0,0,.35); --radius:16px; --radius-lg:22px;
+    --focus: 0 0 0 3px rgba(110,231,255,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; background: radial-gradient(1200px 600px at 20% -10%, rgba(167,139,250,.15), transparent 60%),
+    radial-gradient(1000px 500px at 100% 0%, rgba(110,231,255,.12), transparent 60%), var(--bg);
+    color:var(--text); font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  }
+  a{color:var(--accent)}
+  .container{max-width:1160px; margin:0 auto; padding:24px}
+  header{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px;
+  }
+  .brand{display:flex; align-items:center; gap:12px}
+  .logo{width:40px; height:40px; border-radius:50%; background: linear-gradient(135deg, var(--accent-2), var(--accent)); box-shadow: var(--shadow)}
+  h1{font-size: clamp(22px, 2.6vw, 34px); margin:0}
+  .subtitle{color:var(--sub); margin-top:4px; font-size:14px}
+
+  /* Toggle */
+  .toggle{
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border:1px solid rgba(255,255,255,.08); border-radius: var(--radius-lg); padding:6px; display:inline-flex; gap:6px;
+    box-shadow: var(--shadow);
+  }
+  .tbtn{position:relative; appearance:none; border:none; background:transparent; color:var(--sub);
+    padding:10px 14px; min-width:130px; border-radius:12px; cursor:pointer; font-weight:600; letter-spacing:.2px;
+  }
+  .tbtn[aria-pressed="true"]{
+    color:var(--bg); background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,.15), 0 6px 18px rgba(110,231,255,.25);
+  }
+  .tbtn:focus-visible{outline:none; box-shadow: var(--focus)}
+
+  /* Grid */
+  .grid{display:grid; gap:16px}
+  @media(min-width: 940px){ .grid{grid-template-columns: 1.1fr .9fr} }
+
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius-lg); padding:18px; box-shadow: var(--shadow);
+  }
+  .card h2{margin:0 0 8px; font-size: clamp(18px, 2vw, 22px)}
+  .muted{color:var(--sub)}
+
+  .overview{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 14px}
+  .badge{background:var(--chip); color:var(--text); padding:6px 10px; border-radius:999px; font-size:13px; border:1px solid rgba(255,255,255,.07)}
+
+  /* Mock chat */
+  .chat{display:flex; flex-direction:column; gap:10px; height:330px; background: #0b1330; border:1px solid rgba(255,255,255,.08);
+    border-radius:14px; padding:12px; overflow:auto; scroll-behavior:smooth}
+  .row{display:flex; gap:10px; align-items:flex-start}
+  .row.user{flex-direction:row-reverse}
+  .avatar{width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,#334,#556); flex:0 0 auto}
+  .avatar.bot{background: linear-gradient(135deg, var(--accent-2), #4f46e5)}
+  .bubble{max-width:70%; padding:10px 12px; border-radius:14px; position:relative; font-size:14px}
+  .bubble.user{background:#172046; border:1px solid rgba(255,255,255,.06)}
+  .bubble.bot{background:#0f1a3f; border:1px solid rgba(255,255,255,.08)}
+  .time{font-size:11px; color:#99a; margin-top:4px}
+  .input{margin-top:10px; display:flex; gap:8px}
+  .input input{flex:1; background:#0a1533; color:#9fb2ff; border:1px dashed #2a3a72; border-radius:12px; padding:10px}
+  .input button{background:#1a2a58; color:#9fb2ff; border:1px solid #2a3a72; border-radius:12px; padding:10px 12px}
+
+  /* Flow note */
+  .flow{margin-top:10px; font-size:13px; color:#a9b3d9}
+  .flow svg{vertical-align:-2px;}
+
+  /* Requirements */
+  .req-actions{display:flex; gap:8px; flex-wrap:wrap}
+  .btn{background:#16214a; color:var(--text); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:10px 12px; cursor:pointer; font-weight:600}
+  .btn:focus-visible{outline:none; box-shadow: var(--focus)}
+
+  .legend{display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 12px}
+  .chip{background:var(--chip); border:1px solid rgba(255,255,255,.1); color:#cfe2ff; padding:3px 8px; border-radius:999px; font-size:12px}
+
+  .req-grid{display:grid; grid-template-columns:1fr; gap:10px}
+  @media(min-width:680px){.req-grid{grid-template-columns:1fr 1fr}}
+  @media(min-width:980px){.req-grid{grid-template-columns:1fr 1fr 1fr}}
+
+  .req{background:#0c1433; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; position:relative; transition: transform .2s ease, background .2s ease}
+  .req:hover{transform: translateY(-2px)}
+  .req h4{margin:0 0 6px; font-size:15px}
+  .req .detail{color:#bac4e4; font-size:13px}
+  .req .tag{position:absolute; top:10px; right:10px}
+  .req .tip{display:none; margin-top:8px; font-size:12px; color:#9de2ff}
+  .req[aria-expanded="true"] .tip{display:block}
+
+  .fade{animation: fade .25s ease}
+  @keyframes fade{from{opacity:.25; transform: translateY(4px)} to{opacity:1; transform:none}}
+
+  footer{margin:20px 0 10px; color:#9aa4c8; font-size:12px; text-align:center}
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand" aria-label="Brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Chatbot Showcase</h1>
+          <div class="subtitle">Switch between <strong>FAQs</strong>, <strong>Bookings</strong>, and <strong>Troubleshooting</strong> to see capabilities and build requirements.</div>
+        </div>
+      </div>
+      <nav class="toggle" role="tablist" aria-label="Choose chatbot type">
+        <button class="tbtn" id="t-faqs" role="tab" aria-selected="true" aria-pressed="true" data-key="faqs">FAQs</button>
+        <button class="tbtn" id="t-bookings" role="tab" aria-selected="false" aria-pressed="false" data-key="bookings">Bookings</button>
+        <button class="tbtn" id="t-troubleshooting" role="tab" aria-selected="false" aria-pressed="false" data-key="troubleshooting">Troubleshooting</button>
+      </nav>
+    </header>
+
+    <section class="grid" aria-live="polite">
+      <article class="card fade" id="showcase">
+        <h2 id="showcase-title">FAQs Chatbot</h2>
+        <p class="muted" id="tagline">Instant answers to common questions.</p>
+        <div class="overview" id="overview"></div>
+
+        <div class="grid" style="gap:14px; grid-template-columns:1.1fr .9fr">
+          <div>
+            <h3 style="margin:0 0 8px; font-size:16px; color:#cfe2ff">Capabilities</h3>
+            <ul id="capabilities" class="muted" style="margin:0 0 10px 18px"></ul>
+            <div class="flow" id="flow"></div>
+          </div>
+          <div>
+            <div class="chat" id="chat" aria-label="Mock conversation" tabindex="0"></div>
+            <div class="input" aria-disabled="true">
+              <input type="text" value="" placeholder="Demo only – input disabled" disabled aria-disabled="true"/>
+              <button class="btn" disabled aria-disabled="true">Send</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card fade" id="requirements">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap">
+          <h2 style="margin:0">Build Requirements</h2>
+          <div class="req-actions">
+            <button class="btn" id="copyBtn" title="Copy current requirements as Markdown">Copy as Checklist</button>
+            <button class="btn" id="jsonBtn" title="Download current configuration as JSON">Download JSON</button>
+          </div>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div class="req-grid" id="reqGrid" ></div>
+      </article>
+    </section>
+
+    <footer>Single-file demo • No external dependencies • © Your Name</footer>
+  </div>
+
+<script>
+// --- Data ------------------------------------------------------------
+const CHATBOTS = {
+  faqs: {
+    key: 'faqs',
+    label: 'FAQs',
+    tagline: 'Instant answers to common questions.',
+    overview: ['Deflect repetitive queries 24/7','Trains on your knowledge base and website','Citations & links to source content'],
+    capabilities: ['Natural-language intent detection','Retrieval Augmented Generation (RAG) over FAQ corpus','Multilingual answers','Confidence thresholds and escalation'],
+    flow: 'User → Intent detect → Retrieve → Generate answer → Cite/Link',
+    mockConversation: [
+      { from:'user', text:'What are your course prerequisites?' },
+      { from:'bot', text:'You\'ll need basic Python and Git. Full list is in Module 0 and the welcome pack.' },
+      { from:'user', text:'How long is the course?' },
+      { from:'bot', text:'12 weeks, self‑paced, with weekly live Q&A sessions every Thursday.' },
+      { from:'user', text:'Do I get a certificate?' },
+      { from:'bot', text:'Yes. You\'ll receive a shareable certificate upon completing all assessments.' }
+    ],
+    requirements: [
+      { tag:'Data', name:'Knowledge base (FAQ corpus)', detail:'Articles, PDFs or CSV/JSON; chunking & metadata for retrieval.', tip:'Start with 50–100 well‑curated Q&As; iterate using analytics.' },
+      { tag:'AI', name:'RAG pipeline', detail:'Embeddings + vector index (e.g., FAISS/PGVector).', tip:'Tune chunk size (300–500 tokens) and add source citations.' },
+      { tag:'Ops', name:'Admin CMS', detail:'Non‑technical updates, versioning & approvals.', tip:'Add a preview mode to test responses before publishing.' },
+      { tag:'Safety', name:'Guardrails', detail:'Off‑topic guidance, PII scrubbing, handoff to human.', tip:'Set up trigger phrases & thresholds for escalation.' },
+      { tag:'Analytics', name:'Insights', detail:'Deflection rate, unresolved intents, feedback loop.', tip:'Feed low‑confidence queries back into training set.' }
+    ]
+  },
+  bookings: {
+    key:'bookings',
+    label:'Bookings',
+    tagline:'Schedule courses, rooms, or appointments with live availability.',
+    overview:['Real‑time availability & conflict checks','Payments & confirmations','Calendar + CRM synchronisation'],
+    capabilities:['Account recognition & profile prefill','Availability lookup and slot suggestions','Optional payment capture','Email/SMS confirmations & updates'],
+    flow:'User → Intent → Availability lookup (API) → Reserve → Confirm/Pay → Notify',
+    mockConversation:[
+      { from:'user', text:'Can I book the Intro to AI workshop next Tuesday?' },
+      { from:'bot', text:'I can see 10:00 or 14:00 available on Tue. Which works for you?' },
+      { from:'user', text:'10:00 please.' },
+      { from:'bot', text:'Booked for Tue 10:00. A confirmation email and calendar invite are on the way.' }
+    ],
+    requirements:[
+      { tag:'API', name:'Booking API', detail:'Integration to Calendly/Google Calendar/custom reservation system.', tip:'Store provider event IDs to support rescheduling/cancellations.' },
+      { tag:'Data', name:'Offerings & rules', detail:'Catalog of courses/rooms, durations, capacities, blackout rules.', tip:'Represent constraints declaratively for easy changes.' },
+      { tag:'Security', name:'Auth & profiles', detail:'OAuth/SAML/SSO; user profiles and preferences.', tip:'Use short‑lived tokens for write operations.' },
+      { tag:'Payments', name:'Payment gateway (optional)', detail:'Stripe/Adyen with PCI‑compliant flow.', tip:'Pre‑authorize then capture on confirmation to reduce no‑shows.' },
+      { tag:'Notify', name:'Comms', detail:'Email/SMS confirmations, reminders, and ICS calendar invites.', tip:'Include reschedule links to reduce support load.' }
+    ]
+  },
+  troubleshooting: {
+    key:'troubleshooting',
+    label:'Troubleshooting',
+    tagline:'Guide users through diagnostics and fixes, then verify resolution.',
+    overview:['Step‑by‑step guided flows','Automated checks & telemetry','Seamless escalation to human or ticketing'],
+    capabilities:['Decision trees with state memory','Device/app diagnostics via secure APIs','Attach logs or screenshots','Link to KB articles and track resolutions'],
+    flow:'User → Intent → Decision tree/Diagnostics → Steps → Verify → Resolve/Escalate',
+    mockConversation:[
+      { from:'user', text:'My app keeps crashing when I open a project.' },
+      { from:'bot', text:'Let\'s run a quick check. Are you on v2.4 or later?' },
+      { from:'user', text:'v2.3.' },
+      { from:'bot', text:'Please update to v2.4. If it still crashes, I\'ll collect logs and open a ticket.' }
+    ],
+    requirements:[
+      { tag:'AI', name:'Intent + policy engine', detail:'Maps symptoms to flows, tracks state and outcomes.', tip:'Log decision paths to improve troubleshooting trees.' },
+      { tag:'API', name:'Diagnostics API', detail:'Safe commands/log collection; rate‑limited.', tip:'Never run destructive ops without explicit consent.' },
+      { tag:'Data', name:'Knowledge articles', detail:'How‑to guides with versions and OS/app coverage.', tip:'Keep fix steps atomic and measurable for verification.' },
+      { tag:'Ops', name:'Ticketing integration', detail:'ServiceNow/Jira with bi‑directional status updates.', tip:'Autofill repro steps and environment for engineers.' },
+      { tag:'Safety', name:'Fallback & privacy', detail:'Permissions prompts, PII redaction, human escalation.', tip:'Show a summary before sending logs for transparency.' }
+    ]
+  }
+};
+
+const TAG_COLORS = {
+  Data:'#3b82f6', API:'#06b6d4', AI:'#a78bfa', Safety:'#f43f5e', Analytics:'#10b981', Ops:'#f59e0b', Payments:'#22c55e', Security:'#ef4444', Notify:'#38bdf8'
+};
+
+// --- Helpers ---------------------------------------------------------
+const $ = (sel, el=document) => el.querySelector(sel);
+const $$ = (sel, el=document) => [...el.querySelectorAll(sel)];
+const el = (tag, attrs={}, children=[])=>{ const n=document.createElement(tag); for(const k in attrs){
+  if(k==='class') n.className=attrs[k]; else if(k==='dataset'){ for(const d in attrs[k]) n.dataset[d]=attrs[k][d]; }
+  else if(k==='text') n.textContent=attrs[k]; else if(k.startsWith('on')) n.addEventListener(k.slice(2), attrs[k]);
+  else n.setAttribute(k, attrs[k]); }
+  children.forEach(c=> n.append(c)); return n; };
+
+function saveState(key){ localStorage.setItem('activeChatbot', key); }
+function loadState(){ return localStorage.getItem('activeChatbot') || 'faqs'; }
+
+// --- Rendering -------------------------------------------------------
+function render(key){
+  const cfg = CHATBOTS[key]; if(!cfg) return;
+  // Toggle UI
+  $$('.tbtn').forEach(btn=>{
+    const is = btn.dataset.key===key; btn.setAttribute('aria-pressed', is); btn.setAttribute('aria-selected', is);
+  });
+  // Headings
+  $('#showcase-title').textContent = cfg.label + ' Chatbot';
+  $('#tagline').textContent = cfg.tagline;
+  // Overview badges
+  const ov = $('#overview'); ov.innerHTML=''; cfg.overview.forEach(x=> ov.append(el('span',{class:'badge', text:x})));
+  // Capabilities list
+  const cap = $('#capabilities'); cap.innerHTML=''; cfg.capabilities.forEach(x=> cap.append(el('li',{text:x})));
+  // Flow
+  $('#flow').innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 12h14l-4-4 1.4-1.4L21.8 14l-7.4 7.4L13 20l4-4H3z"/></svg> ${cfg.flow}`;
+  // Chat
+  const chat = $('#chat'); chat.innerHTML=''; cfg.mockConversation.forEach(m=>{
+    const row = el('div',{class:'row '+m.from});
+    const avatar = el('div',{class:'avatar '+(m.from==='bot'?'bot':'') , 'aria-hidden':'true'});
+    const bubble = el('div',{class:'bubble '+m.from});
+    bubble.append(el('div',{text:m.text}));
+    bubble.append(el('div',{class:'time', text:new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}));
+    row.append(avatar, bubble); chat.append(row);
+  });
+  chat.scrollTop = chat.scrollHeight;
+
+  // Requirements
+  const grid = $('#reqGrid'); grid.innerHTML=''; cfg.requirements.forEach((r, i)=>{
+    const card = el('button',{class:'req', role:'button', 'aria-expanded':'false', title:r.detail});
+    const tag = el('span',{class:'chip tag', text:r.tag});
+    tag.style.background = 'linear-gradient(180deg, '+(TAG_COLORS[r.tag]||'#64748b')+', #1f2937)';
+    const h4 = el('h4',{text:r.name});
+    const p = el('div',{class:'detail', text:r.detail});
+    const tip = el('div',{class:'tip', text:'Tip: '+r.tip});
+    card.append(tag, h4, p, tip);
+    card.addEventListener('click', ()=>{
+      const expanded = card.getAttribute('aria-expanded')==='true';
+      card.setAttribute('aria-expanded', !expanded);
+    });
+    grid.append(card);
+  });
+
+  // Legend
+  const legend = $('#legend'); legend.innerHTML='';
+  const used = [...new Set(cfg.requirements.map(r=>r.tag))];
+  used.forEach(tag=>{ const chip = el('span',{class:'chip', text:tag}); chip.style.borderColor='rgba(255,255,255,.18)'; legend.append(chip);});
+
+  saveState(key);
+}
+
+// Copy requirements as Markdown
+function copyChecklist(){
+  const key = currentKey();
+  const r = CHATBOTS[key].requirements;
+  const md = `# ${CHATBOTS[key].label} Chatbot – Build Checklist\n`+ r.map(x=>`- [ ] **${x.name}** — ${x.detail} _(${x.tag})_`).join('\n');
+  navigator.clipboard.writeText(md).then(()=>{
+    flash('#copyBtn');
+  });
+}
+// Download JSON for current config
+function downloadJSON(){
+  const key = currentKey(); const data = CHATBOTS[key];
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${key}-chatbot.json`; a.click(); URL.revokeObjectURL(a.href);
+  flash('#jsonBtn');
+}
+
+function flash(sel){ const b=$(sel); const prev=b.style.filter; b.style.filter='brightness(1.3)'; setTimeout(()=> b.style.filter=prev, 250); }
+function currentKey(){ return ($$('.tbtn').find(b=>b.getAttribute('aria-pressed')==='true')||{}).dataset?.key || 'faqs'; }
+
+// Events
+$$('.tbtn').forEach(btn=> btn.addEventListener('click', ()=> render(btn.dataset.key)));
+$('#copyBtn').addEventListener('click', copyChecklist);
+$('#jsonBtn').addEventListener('click', downloadJSON);
+
+// Init
+render(loadState());
+</script>
+</body>
+</html>
